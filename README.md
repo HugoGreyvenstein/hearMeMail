@@ -10,11 +10,25 @@
 2. Change directory to project root:
 
         cd hearMeMail
-3. Start server:
+
+3. Edit the configuration file (default location is the project root: `config.yml`):
+
+        email:
+          api-key: "<your api key>"
+          name: "<your name>"
+          from: "<your sendgrid email address>"
+
+4. Start server:
     
         go run main.go
  The server will be started on port `8080`
         
+The default config file is in the project root and is named `config.yml`. 
+    A custom config file can be specified by supplying a command line argument:
+    
+        go run main.go <config-file-location>
+
+
 
 ## Troubleshooting
 
