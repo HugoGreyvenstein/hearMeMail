@@ -42,9 +42,10 @@ func (handler *EmailHandler) Handler(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	err = handler.emailService.SendEmail(services.SendEmailParameters{
-		To:      emailRequest.Email,
-		Subject: emailRequest.Subject,
-		Body:    emailRequest.Body,
+		FromUsername: req.Header[headerUsername][0],
+		To:           emailRequest.Email,
+		Subject:      emailRequest.Subject,
+		Body:         emailRequest.Body,
 	})
 	if err != nil {
 		message := fmt.Sprintf("Failed to send email: err=%+v", err)

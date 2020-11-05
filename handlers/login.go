@@ -85,8 +85,8 @@ func (handler *LoginHandler) Handler(rw http.ResponseWriter, req *http.Request) 
 
 func (handler *LoginHandler) TokenChecker(handlerFunc func(rw http.ResponseWriter, req *http.Request)) func(rw http.ResponseWriter, req *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		username := req.Header["Username"]
-		token := req.Header["Token"]
+		username := req.Header[headerUsername]
+		token := req.Header[headerToken]
 		if username == nil || token == nil || len(username) < 1 || len(token) < 1 {
 			writeResponseHeader(rw, http.StatusUnauthorized, "Login token not valid")
 			return

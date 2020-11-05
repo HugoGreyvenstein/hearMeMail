@@ -5,10 +5,17 @@ import (
 	"time"
 )
 
+const EmailLogsAssociation = "EmailLogs"
+
+var UserSchema = []interface{}{
+	User{},
+}
+
 type User struct {
 	gorm.Model
-	Username     string `gorm:"primaryKey"`
+	Username     string `gorm:"unique"`
 	Password     []byte
 	HeaderToken  []byte
 	HeaderExpiry *time.Time
+	EmailLogs    []EmailLog
 }

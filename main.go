@@ -24,23 +24,25 @@ func main() {
 		err = nil
 	}
 
-	database := repositories.UserRepositoryBuild(config)
-	err = database.Initialise()
-	if err != nil {
-		log.Printf("Error occurred initialising database: %+v", err)
-		return
-	}
-
 	// Create Repositories
 	userRepository := repositories.UserRepositoryBuild(config)
-	err = userRepository.Initialise()
+	err = userRepository.InitialiseConnection()
 	if err != nil {
 		log.Printf("User repository initialisation failure: %+v", err)
 		err = nil
 	}
+	userRepository.AutoMigrate()
+
+	emailLogRepository := repositories.EmailLogRepositoryBuild(config)
+	err = emailLogRepository.InitialiseConnection()
+	if err != nil {
+		log.Printf("EmailLogs repository initialisation failure: %+v", err)
+		err = nil
+	}
+	emailLogRepository.AutoMigrate()
 
 	// Create Services
-	emailService := services.EmailServiceBuild(config)
+	emailService := services.EmailServiceBuild(config, emailLogRepository, userRepository)
 	loginService := services.LoginServiceBuild(config, userRepository)
 
 	// Create Handlers

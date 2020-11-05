@@ -8,9 +8,10 @@ import (
 )
 
 type EmailRequestBody struct {
-	Email   string `json:"email"`
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
+	FromUsername string `json:"-"`
+	Email        string `json:"email"`
+	Subject      string `json:"subject"`
+	Body         string `json:"body"`
 }
 
 func (emailRequest EmailRequestBody) validateEmailRequest() error {
@@ -21,6 +22,13 @@ func (emailRequest EmailRequestBody) validateEmailRequest() error {
 }
 
 func (emailRequest *EmailRequestBody) decodeEmailRequestBody(req *http.Request) error {
+	if req.Header != nil {
+		username := req.Header[headerUsername]
+		if len(username) > 0 {
+			emailRequest.FromUsername = username[0]
+		}
+	}
+
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(emailRequest)
 	defer closeRequestBody(req.Body)

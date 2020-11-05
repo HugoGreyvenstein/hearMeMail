@@ -3,17 +3,10 @@ package repositories
 import (
 	"errors"
 	"fmt"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"hearMeMail/global"
 	"hearMeMail/models"
-	"log"
 	"time"
-)
-
-var (
-	ErrNotFound      = errors.New("user not found")
-	ErrDatabaseError = errors.New("database error")
 )
 
 type UserRepository struct {
@@ -25,26 +18,14 @@ func UserRepositoryBuild(config *global.Config) *UserRepository {
 	return &UserRepository{config: config}
 }
 
-func (database *UserRepository) Initialise() error {
-	dsn := fmt.Sprintf("user=%s password=%s dbname=%s port=%d sslmode=disable",
-		database.config.Database.Credentials.Username,
-		database.config.Database.Credentials.Password,
-		database.config.Database.Name,
-		database.config.Database.Port,
-	)
+func (database *UserRepository) InitialiseConnection() error {
+	conn, err := getConnection(database.config)
+	database.connection = conn
+	return err
+}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Printf("Error initialising database: err=%+v", err)
-		return err
-	}
-	database.connection = db
-
-	err = database.connection.AutoMigrate(&models.User{})
-	if err != nil {
-		log.Printf("Failed to migrate schema 'User': err=%+v", err)
-	}
-	return nil
+func (database *UserRepository) AutoMigrate() {
+	autoMigrate(database.connection, models.UserSchema)
 }
 
 func (database *UserRepository) FindByUsername(username string) (*models.User, error) {
@@ -62,7 +43,7 @@ func (database *UserRepository) FindByUsername(username string) (*models.User, e
 
 func (database *UserRepository) FindAll() []models.User {
 	users := make([]models.User, 0)
-	_ = database.connection.Find(&users, "username = ?", "goop")
+	_ = database.connection.Find(&users)
 	return users
 }
 
@@ -72,11 +53,16 @@ func (database *UserRepository) Exists(user *models.User) (*models.User, error) 
 }
 
 func (database *UserRepository) Insert(user *models.User) (*models.User, error) {
-	result := database.connection.FirstOrCreate(user)
+	existingUser := new(models.User)
+	tx := database.connection.Find(existingUser)
+	if tx.Error != nil && tx.Error != gorm.ErrRecordNotFound {
+		return nil, tx.Error
+	}
+	result := database.connection.Create(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return user, nil
+	return database.FindByUsername(user.Username)
 }
 
 func (database *UserRepository) UpdateHeaderToken(user *models.User, headerToken []byte, expiry time.Time) (*models.User, error) {

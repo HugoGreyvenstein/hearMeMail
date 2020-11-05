@@ -6,6 +6,12 @@ import (
 	"net/http"
 )
 
+// Request Header constants
+const (
+	headerUsername = "Username"
+	headerToken    = "Token"
+)
+
 func writeResponseHeader(rw http.ResponseWriter, statusCode int, body string) {
 	rw.WriteHeader(statusCode)
 	_, err := rw.Write([]byte(body))

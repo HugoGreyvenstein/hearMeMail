@@ -11,7 +11,7 @@ type LogoutRequestBody struct {
 }
 
 func (logoutRequest *LogoutRequestBody) decodeLogoutRequestBody(req *http.Request) error {
-	username := req.Header["Username"]
+	username := req.Header[headerUsername]
 	token := req.Header["Token"]
 	if username == nil || token == nil || len(username) < 1 || len(token) < 1 {
 		return errors.New("username and token not valid")
