@@ -2,3 +2,5 @@ email:
   api-key: ""
   name: ""
   from: ""
+brypt:
+  cost: 1

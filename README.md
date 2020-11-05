@@ -4,6 +4,8 @@
 
 ## Setup
 
+### Running the server
+
 1. Clone Repository:
 
         git clone https://github.com/HugoGreyvenstein/hearMeMail.git
@@ -28,7 +30,21 @@ The default config file is in the project root and is named `config.yml`.
     
         go run main.go <config-file-location>
 
+### Running Postgres in Docker
 
+1. Pull image from DockerHub (https://hub.docker.com/_/postgres):
+
+        docker pull postgres
+2. Run image as container:
+
+        docker run --name hearme-postgres -e POSTGRES_PASSWORD=<your preferred password> -p 5432:5432 -d postgres
+    - `--name`: human recognisable name for your container
+    - `-e`: sets environment variables
+    - `POSTGRES_PASSWORD`: root postgres password
+    - `-p`: connects the port running inside of the container with your computer's port i.e. `<container port>:<your computer's port>`
+    - `-d`: specifies that the command will return while the container runs independently
+3. Check your postgres connection:
+    Postgres can now be reached via port `5432`. Use your DB client of choice to test the connection.
 
 ## Troubleshooting
 

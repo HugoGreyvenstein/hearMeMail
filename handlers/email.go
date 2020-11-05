@@ -13,8 +13,6 @@ type EmailHandler struct {
 	emailService *services.EmailService
 }
 
-var availableMethods = []string{http.MethodPost}
-
 func EmailHandlerBuild(config *global.Config, emailService *services.EmailService) EmailHandler {
 	return EmailHandler{config: config, emailService: emailService}
 }
@@ -24,14 +22,13 @@ func (handler *EmailHandler) Handler(rw http.ResponseWriter, req *http.Request) 
 		writeResponseHeader(rw, http.StatusBadRequest, "json body containing 'subject', 'email', 'body' is required")
 		return
 	}
-	err := isMethodAvailable(req.Method, availableMethods...)
-	if err != nil {
+	if req.Method != http.MethodPost {
 		message := fmt.Sprintf("Request method not available for this endpoint: %s", req.Method)
 		writeResponseHeader(rw, http.StatusBadRequest, message)
 		return
 	}
-	emailRequest := EmailRequest{}
-	err = emailRequest.decodeEmailRequestBody(req)
+	emailRequest := EmailRequestBody{}
+	err := emailRequest.decodeEmailRequestBody(req)
 	if err != nil {
 		message := fmt.Sprintf("Failed to decode request body: err=%+v", err)
 		writeResponseHeader(rw, http.StatusBadRequest, message)
