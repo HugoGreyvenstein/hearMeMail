@@ -52,7 +52,7 @@ func main() {
 	// Register Handlers
 	http.HandleFunc("/email", loginHandler.TokenChecker(emailHandler.Handler))
 	http.HandleFunc("/login", loginHandler.Handler)
-	http.HandleFunc("logout", loginHandler.TokenChecker(logoutHandler.Handler))
+	http.HandleFunc("/logout", loginHandler.TokenChecker(logoutHandler.Handler))
 	http.HandleFunc("/register", registerHandler.Handler)
 
 	log.Print("Starting email server")

@@ -38,12 +38,12 @@ func (handler *LogoutHandler) Handler(rw http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	err = handler.loginService.Logout(requestBody.Username, requestBody.HeaderToken)
+	err = handler.loginService.Logout(requestBody.Username)
 	if err != nil {
 		message := fmt.Sprintf("%+v", err)
 		log.Printf(message)
 		writeResponseHeader(rw, http.StatusInternalServerError, message)
 		return
 	}
-	writeResponseHeader(rw, http.StatusOK, "")
+	writeResponseHeader(rw, http.StatusOK, "Logout success")
 }

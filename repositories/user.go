@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -8,6 +9,11 @@ import (
 	"hearMeMail/models"
 	"log"
 	"time"
+)
+
+var (
+	ErrNotFound      = errors.New("user not found")
+	ErrDatabaseError = errors.New("database error")
 )
 
 type UserRepository struct {
@@ -41,19 +47,28 @@ func (database *UserRepository) Initialise() error {
 	return nil
 }
 
-func (database *UserRepository) FindByUsername(username string) *models.User {
+func (database *UserRepository) FindByUsername(username string) (*models.User, error) {
 	user := new(models.User)
-	database.connection.First(user, "username = ?", username)
-	if user.Username == "" {
-		return nil
+	tx := database.connection.First(user, "username = ?", username)
+	if tx.Error == gorm.ErrRecordNotFound {
+		return nil, ErrNotFound
 	}
-	return user
+	if tx.Error != nil {
+		errMessage := ErrDatabaseError.Error() + fmt.Sprintf(": %+v", tx.Error)
+		return user, errors.New(errMessage)
+	}
+	return user, nil
 }
 
 func (database *UserRepository) FindAll() []models.User {
 	users := make([]models.User, 0)
 	_ = database.connection.Find(&users, "username = ?", "goop")
 	return users
+}
+
+func (database *UserRepository) Exists(user *models.User) (*models.User, error) {
+	result := database.connection.First(user)
+	return user, result.Error
 }
 
 func (database *UserRepository) Insert(user *models.User) (*models.User, error) {
@@ -72,14 +87,17 @@ func (database *UserRepository) UpdateHeaderToken(user *models.User, headerToken
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return database.FindByUsername(user.Username), nil
+	user, err := database.FindByUsername(user.Username)
+	return user, err
 }
 
-func (database *UserRepository) DeleteHeaderToken(username string, token string) error {
+func (database *UserRepository) DeleteHeaderToken(username string) error {
+	expiry := time.Now()
 	user := models.User{
-		Username:    username,
-		HeaderToken: []byte(token),
+		Username:     username,
+		HeaderToken:  []byte{},
+		HeaderExpiry: &expiry,
 	}
-	tx := database.connection.Model(&user).Updates(models.User{HeaderToken: nil, HeaderExpiry: nil})
+	tx := database.connection.Model(&user).Updates(user)
 	return tx.Error
 }

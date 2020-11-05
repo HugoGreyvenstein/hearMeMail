@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hearMeMail/global"
+	"hearMeMail/repositories"
 	"hearMeMail/services"
 	"log"
 	"net/http"
@@ -90,7 +91,13 @@ func (handler *LoginHandler) TokenChecker(handlerFunc func(rw http.ResponseWrite
 			writeResponseHeader(rw, http.StatusUnauthorized, "Login token not valid")
 			return
 		}
-		if !handler.loginService.TokenValid(username[0], token[0]) {
+		isValid, err := handler.loginService.TokenValid(username[0], token[0])
+		if err != nil && err != repositories.ErrNotFound {
+			log.Printf("Could not determine if token was valid: username=%s, token=%s, err=%+v", username, token, err)
+			writeResponseHeader(rw, http.StatusInternalServerError, "Could not determine if token was valid")
+			return
+		}
+		if !isValid {
 			writeResponseHeader(rw, http.StatusUnauthorized, "Login token not valid")
 			return
 		}

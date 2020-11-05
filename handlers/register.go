@@ -50,11 +50,21 @@ func (handler *RegisterHandler) Handler(rw http.ResponseWriter, req *http.Reques
 		writeResponseHeader(rw, http.StatusBadRequest, message)
 		return
 	}
-	password, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), handler.config.Bcrypt.Cost)
-	user, err := handler.userRepository.Insert(&models.User{
-		Username: requestBody.Username,
-		Password: password,
-	})
+	existingUser, err := handler.userRepository.FindByUsername(requestBody.Username)
+	if existingUser != nil {
+		message := fmt.Sprintf("User with username already exists: err=%+v", err)
+		writeResponseHeader(rw, http.StatusUnauthorized, message)
+		return
+	}
+	if err != nil && err != repositories.ErrNotFound {
+		message := fmt.Sprintf("Database error: err=%+v", err)
+		writeResponseHeader(rw, http.StatusInternalServerError, message)
+		return
+	}
+	newUser := &models.User{}
+	newUser.Username = requestBody.Username
+	newUser.Password, _ = bcrypt.GenerateFromPassword([]byte(requestBody.Password), handler.config.Bcrypt.Cost)
+	user, err := handler.userRepository.Insert(newUser)
 	if err != nil {
 		message := fmt.Sprintf("Failed to insert new user: %+v", err)
 		log.Printf(message)
