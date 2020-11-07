@@ -4,7 +4,24 @@
 
 ## Setup
 
-### Running the server
+### Running the server using docker
+
+1. Create network bridge for communication between containers:
+
+        docker network create hearme-bridge
+2. Start Postgres (if you have not pulled the postgres docker image follow the steps `Running Postgres in Docker``):
+
+        docker run --name hearme-postgres -e POSTGRES_PASSWORD=<your postgres password> --network hearme-bridge -p 5432:5432 -d postgres
+
+3. Build docker image
+
+        docker build -t hearme-mail:latest .
+
+4. Start docker container
+
+        docker run --network hearme-bridge --name hearme-mail -p 8080:8080 hearme-mail
+
+### Running server without docker
 
 1. Clone Repository:
 

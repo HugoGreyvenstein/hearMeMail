@@ -3,4 +3,16 @@ email:
   name: ""
   from: ""
 brypt:
-  cost: 1
+  cost: 4
+database:
+  host: hearme-postgres
+  port: 5432
+  name: "postgres"
+  connections:
+    max-idle: 100
+    max-open: 100
+    max-idle-time: 100 # seconds
+    max-lifetime: 1000 # seconds
+  credentials:
+    username: "postgres"
+    password: ""

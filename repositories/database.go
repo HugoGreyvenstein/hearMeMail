@@ -25,7 +25,8 @@ func autoMigrate(connection *gorm.DB, schemas []interface{}) {
 }
 
 func getConnection(config *global.Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("user=%s password=%s dbname=%s port=%d sslmode=disable",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		config.Database.Host,
 		config.Database.Credentials.Username,
 		config.Database.Credentials.Password,
 		config.Database.Name,

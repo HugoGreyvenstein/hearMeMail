@@ -16,7 +16,8 @@ type Config struct {
 		Cost int `yaml:"cost"`
 	} `yaml:"brypt"`
 	Database struct {
-		Port        int    `yaml:"port"`
+		Host        string `yaml:"host"`
+		Port        uint   `yaml:"port"`
 		Name        string `yaml:"name"`
 		Connections struct {
 			MaxIdle     int `yaml:"max-idle"`

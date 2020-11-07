@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"hearMeMail/global"
 	"hearMeMail/handlers"
 	"hearMeMail/repositories"
@@ -21,7 +22,7 @@ func main() {
 	config, err := global.LoadConfig(configFileName)
 	if err != nil {
 		log.Printf("Error occurred loading config: %+v", err)
-		err = nil
+		return
 	}
 
 	// Create Repositories
@@ -29,7 +30,7 @@ func main() {
 	err = userRepository.InitialiseConnection()
 	if err != nil {
 		log.Printf("User repository initialisation failure: %+v", err)
-		err = nil
+		return
 	}
 	userRepository.AutoMigrate()
 
@@ -37,7 +38,7 @@ func main() {
 	err = emailLogRepository.InitialiseConnection()
 	if err != nil {
 		log.Printf("EmailLogs repository initialisation failure: %+v", err)
-		err = nil
+		return
 	}
 	emailLogRepository.AutoMigrate()
 
@@ -57,8 +58,8 @@ func main() {
 	http.HandleFunc("/logout", loginHandler.TokenChecker(logoutHandler.Handler))
 	http.HandleFunc("/register", registerHandler.Handler)
 
-	log.Print("Starting email server")
-	// TODO Make port configurable
-	err = http.ListenAndServe(":8080", nil)
+	log.Print("Server started")
+	addr := fmt.Sprintf(":%d", config.Database.Port)
+	err = http.ListenAndServe(addr, nil)
 	log.Printf("Error occurred while running server: err=%+v", err)
 }
