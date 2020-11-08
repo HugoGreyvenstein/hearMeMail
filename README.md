@@ -75,3 +75,15 @@ If the following error occurrs there is already a `HearMeMail` server running.
     Find the running process and kill it:
     
         Only one usage of each socket address (protocol/network address/port) is normally permitted.
+
+## Future improvements
+
+- How the ORM (Gorm) is used can be improved upon. At the moment transactions and concurrent calls may be handled incorrectly.
+- Refactor to use a logger such as Logrus
+- Make config file configurable
+- Refactor docker image building so that config can be changed without building a new docker image
+- Refactor builder constructors into fluent methods
+- HTTP level error handling can be generalised. At the moment a lot of the error handling is duplicated between handlers
+- Database should use a connection pool
+- Docker layers should cache dependencies to avoid downloading when image is built
+- Add indices on database tables
